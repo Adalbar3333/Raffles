@@ -1,1 +1,0 @@
-This alias rolls the winners of the raffle. You do not need to do any imput here as all the imput needed was collected during the setup process!
