@@ -1,0 +1,1 @@
+Leaves the current raffle.

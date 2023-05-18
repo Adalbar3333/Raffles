@@ -1,0 +1,70 @@
+multiline
+<drac2>
+A      = &ARGS&
+a      = argparse(A)
+output = None
+text   = f''' -footer "{ctx.prefix + ctx.alias} | @Adalbär#3333"'''
+PR     = load_yaml(get_uvar("preppedRaffles","[]"))
+i      = combat()
+
+using(timeConverter='e84d5d89-2fc7-4a14-be7a-cd73f2657cee')
+
+def raffleDisp(raffle):
+    raffleText = ""
+    raffleText += f''' -title "{raffle['title']}" '''
+    raffleText += f''' -desc "The raffle can be joined by running `{ctx.prefix}{ctx.alias} join`\n\nDescription:\n{raffle['desc']}" '''
+    for x in raffle['fstring']:
+        raffleText += f''' -f "{x}"'''
+    raffleText += f''' -image "{raffle['image']}" '''
+    raffleText += f''' -f "Number of Drawings -> {raffle['drawNumber']}\n\nEnd on Drawing -> {raffle['end?']}\n\nRaffle time till end -> {(timeConverter.StoD(int(raffle['time'])).strip('{}'))}" '''
+    return raffleText
+
+# No args - This is almost a help response
+if not A:
+    if i:
+        # Disp current raffle
+        raffle = load_yaml(combat().get_metadata('raffleData', None))
+        if not raffle:
+            return f"echo There is no raffle here. Start ove via `!raffle 'raffle name'`. "
+        raffleEntries = load_yaml(combat().get_metadata('raffleEntries'))
+        entriesText = f""" -f "Raffle Entries|"""
+        NoE = 0
+        for entry in raffleEntries:
+            NoE += 1
+            entriesText += f'''{NoE} - '''
+            entriesText += f'''{entry['user']}, '''
+            entriesText += f'''{entry['desc']}, '''
+            entriesText += f'''{entry['ToE']}\n'''
+        entriesText += f''' "'''
+        text += raffleDisp(raffle)
+        text += entriesText
+
+        return f'''embed {text}'''
+    else:
+        text += f""" -title "Raffles!!!" """
+        text += f""" -desc "Welcome to Raffles!!! Here you can find most of the information for the alias, however, I do still suggest looking at the helps for the subalias' like `create`!\n\nThis alias allows you to make raffles that your memebers can join in!\n\nStarting a raffle is easy. Just open an inititave, and run `!raffle \\"Raffle Name\\"`. You must create a raffle to use before you can actually start a raffle.\n\nJoining a raffle is simple! Just a quick `!raffle join -desc \\"Additional Information\\"` and they have joined. Leaving is just as simple; `!raffle leave` will remove the user from the raffle." """
+        return f"{ctx.prefix}embed {text}"
+
+if PR:
+    raffle = None
+    for raffle in PR:
+        if A[0] in raffle["name"]:
+            break
+    if not raffle:
+        err("You do not have a raffle by that name. Please assess your raffles and try again.")
+
+    #Display Raffle
+    text += raffleDisp(raffle)
+
+    #Set up init, introduce metadata
+    raffleData = dump_yaml(raffle)
+    if combat() and ctx.guild:
+        combat().set_metadata('raffleData',raffleData)
+        text += f''' -f "Your raffle has been started. You can now do `{ctx.prefix}{ctx.alias}` to see the current raffle and it's members." '''
+    else:
+        text += f''' -desc "This raffle is not active yet. Start an inititave, then run `{ctx.prefix}{ctx.alias} {raffle['name']}` again.\n\nDescription:\n{raffle['desc']}"'''
+        text += f''' -f "Run this alias again after starting inititave." '''
+    return f"""{ctx.prefix}embed {text}"""
+
+return "echo something is wrong..."
+</drac2>
