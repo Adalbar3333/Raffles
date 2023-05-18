@@ -1,0 +1,66 @@
+multiline
+<drac2>
+
+A    = &ARGS&
+a    = argparse(A)
+ch   = character()
+PR   = load_yaml(get_uvar("preppedRaffles","[]"))
+text = f''' -footer "{ctx.prefix}{ctx.alias} | @Adalbär#3333"'''
+
+using(timeConverter='e84d5d89-2fc7-4a14-be7a-cd73f2657cee')
+
+#Define submitted text
+
+callname    = a.last('name')
+title       = a.last('t', a.last('title'))
+desc        = a.last('d',a.last('desc'))
+fstring     = a.get('f',a.get('fstring'))
+image       = a.last('i',a.last('image'))
+numberDrawn = a.last('num',1,int)
+end         = a.last('end',True,bool)
+times       = a.last('time',86400,int)
+
+# Empty dict for uvar
+
+newRaffle = load_yaml("{}")
+
+if title and desc and callname:
+	newRaffle['name']       = callname
+	newRaffle['title']      = title
+	newRaffle['desc']       = desc
+	newRaffle['fstring']    = load_yaml("[]")
+	newRaffle['image']      = image
+	newRaffle['drawNumber'] = numberDrawn
+	newRaffle['end?']       = end
+	newRaffle['time']       = times
+	
+	for x in fstring:
+		newRaffle['fstring'].append(x)
+	
+	update=True
+	for x in PR:
+		if newRaffle['name'] == x['name']:
+			update=False
+	if update:
+		PR.append(newRaffle)
+	set_uvar("preppedRaffles",dump_yaml(PR))
+
+	# display raffle creation and note that it is added to the uvar
+
+	text += f''' -title "Raffle Created - {newRaffle['title']}" '''
+	text += f''' -desc "The raffle can be started by running `{ctx.prefix}{ctx.alias} {newRaffle['name']}`\n\nDescription:\n{newRaffle['desc']}" '''
+	for x in newRaffle['fstring']:
+		text += f''' -f "{x}"'''
+	text += f''' -image "{newRaffle['image']}" '''
+	text += f''' -f "Number of Drawings -> {newRaffle['drawNumber']}\n\nEnd on Drawing -> {newRaffle['end?']}\n\nRaffle time till end -> {(timeConverter.StoD(int(newRaffle['time'])).strip('{}'))}" '''
+	return(f'''{ctx.prefix}embed {text}\n{ctx.prefix}echo "Your raffle has been saved in your `preppedRaffles` uvar."''')
+
+else:
+	text += f''' -title "Missing Requirmenets to Create Raffle!!!" '''
+	text += f''' -desc "To create a raffle, you need a call name `-name`, title `-title`, and description `-desc`!" '''
+	text += f''' -f "Appliciable Arguments!!!|`-name` - How you call upon the raffle to begin it.\n`-title|-t` - Title of the Raffle. \n`-desc|-d` - The main description of the title. \n`-fstring` - You can have multiple fStrings, which can be set up as follows `String Title|Text`. This can be used to create rules for the raffle, or additional information.\n`-image|-i` - Adding an image to the raffle.\n`-num` - The number of people who can be drawn for the raffle.\n`-end` - True or False. If set to true, the raffle will be ended after you have rolled the winners of the raffle!\n`-time` - used to define a ending time for the raffle." '''
+	return(f"{ctx.prefix}embed {text}")
+
+
+return(f"""echo "Something went **__WRONG!!!__**" """)
+</drac2>
